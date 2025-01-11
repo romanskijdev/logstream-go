@@ -25,12 +25,12 @@ var broadcast = make(chan string)
 func InitLogger() {
 	logrus.SetReportCaller(false)
 
+	logrus.StandardLogger().ReplaceHooks(make(logrus.LevelHooks))
+	logrus.SetOutput(io.Discard)
+
 	// Создаем хуки для разных форматов
 	consoleHook := newConsoleHook(os.Stdout)
 	webSocketHook := newWebSocketHook(broadcast)
-
-	logrus.StandardLogger().ReplaceHooks(make(logrus.LevelHooks))
-	logrus.SetOutput(io.Discard)
 
 	// Добавляем хуки к логгеру
 	logrus.AddHook(consoleHook)
