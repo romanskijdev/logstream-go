@@ -1,9 +1,9 @@
 package logstream
 
 import (
+	"fmt"
 	"github.com/gorilla/websocket"
 	"github.com/sirupsen/logrus"
-	"io"
 	"net/http"
 	"os"
 )
@@ -26,7 +26,6 @@ func InitLogger() {
 	logrus.SetReportCaller(false)
 
 	logrus.StandardLogger().ReplaceHooks(make(logrus.LevelHooks))
-	logrus.SetOutput(io.Discard)
 
 	// Создаем хуки для разных форматов
 	consoleHook := newConsoleHook(os.Stdout)
@@ -36,6 +35,10 @@ func InitLogger() {
 	logrus.AddHook(consoleHook)
 	logrus.AddHook(webSocketHook)
 
+	// ... добавление ваших хуков ...
+	for level, hooks := range logrus.StandardLogger().Hooks {
+		fmt.Printf("Hooks for level %s: %v\n", level, hooks)
+	}
 	go handleLogMessages()
 }
 
