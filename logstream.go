@@ -1,6 +1,7 @@
 package logstream
 
 import (
+	"encoding/json"
 	"github.com/gorilla/websocket"
 	"github.com/sirupsen/logrus"
 	"io"
@@ -23,13 +24,35 @@ var broadcast = make(chan string)
 
 // Инициализация логирования
 func InitLogger() {
-	logrus.SetFormatter(&logrus.JSONFormatter{})
+	// Создаем стандартный форматтер для вывода в консоль
+	logrus.SetFormatter(&logrus.TextFormatter{})
 
-	// Создаем многозадачный Writer для перенаправления логов в WebSocket и консоль
-	multiWriter := io.MultiWriter(os.Stdout, httpResponseWriter{w: broadcast})
+	// Создаем многозадачный Writer для вывода в консоль и кастомный Writer для WebSocket
+	multiWriter := io.MultiWriter(os.Stdout, newWebSocketWriter())
 	logrus.SetOutput(multiWriter)
 
 	go handleLogMessages()
+}
+
+// Кастомный Writer для WebSocket, который форматирует логи в JSON
+type webSocketWriter struct{}
+
+func newWebSocketWriter() *webSocketWriter {
+	return &webSocketWriter{}
+}
+
+func (w *webSocketWriter) Write(p []byte) (int, error) {
+	var logEntry map[string]interface{}
+	err := json.Unmarshal(p, &logEntry)
+	if err != nil {
+		return 0, err
+	}
+	jsonLog, err := json.Marshal(logEntry)
+	if err != nil {
+		return 0, err
+	}
+	broadcast <- string(jsonLog)
+	return len(p), nil
 }
 
 // Обработчик соединений
@@ -66,14 +89,4 @@ func handleLogMessages() {
 			}
 		}
 	}
-}
-
-// httpResponseWriter позволяет передавать логи в канал
-type httpResponseWriter struct {
-	w chan string
-}
-
-func (w httpResponseWriter) Write(p []byte) (int, error) {
-	w.w <- string(p)
-	return len(p), nil
 }
