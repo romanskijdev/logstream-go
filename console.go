@@ -9,11 +9,11 @@ import (
 
 // Хук для вывода в консоль
 type consoleHook struct {
-	writer io.Writer
+	writer *bufferedWriter
 }
 
 func newConsoleHook(writer io.Writer) *consoleHook {
-	return &consoleHook{writer: writer}
+	return &consoleHook{writer: newBufferedWriter(writer)}
 }
 
 func (h *consoleHook) Fire(entry *logrus.Entry) error {
@@ -29,5 +29,9 @@ func (h *consoleHook) Fire(entry *logrus.Entry) error {
 		return err
 	}
 	_, err = h.writer.Write(line)
-	return err
+
+	if err != nil {
+		return err
+	}
+	return h.writer.Flush() // Сбрасываем буфер после каждой записи
 }
