@@ -3,6 +3,7 @@ package logstream
 import (
 	"github.com/sirupsen/logrus"
 	"io"
+	"runtime"
 )
 
 // Хук для вывода в консоль
@@ -15,7 +16,11 @@ func newConsoleHook(writer io.Writer) *consoleHook {
 }
 
 func (h *consoleHook) Fire(entry *logrus.Entry) error {
-	formatter := &logrus.TextFormatter{} // Используем TextFormatter
+	formatter := &logrus.TextFormatter{
+		CallerPrettyfier: func(f *runtime.Frame) (string, string) {
+			return "", f.File // Возвращаем пустые строки для function и file
+		},
+	}
 
 	line, err := formatter.Format(entry)
 	if err != nil {
