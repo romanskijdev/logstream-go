@@ -59,7 +59,7 @@ func handleLogMessages() {
 		for client := range clients {
 			err := client.WriteJSON(msg)
 			if err != nil {
-				logrus.Printf("❌ Failed to write message: %+v", err)
+				logrus.Errorf("❌ Failed to write message: %+v", err)
 				client.Close()
 				delete(clients, client)
 			}
