@@ -1,6 +1,7 @@
 package logstream
 
 import (
+	"fmt"
 	"github.com/sirupsen/logrus"
 	"io"
 	"runtime"
@@ -24,7 +25,7 @@ func (h *consoleHook) Fire(entry *logrus.Entry) error {
 
 	line, err := formatter.Format(entry)
 	if err != nil {
-		logrus.WithError(err).Error("Failed to format log entry to Console")
+		fmt.Println("Failed to format log entry to Console")
 		return err
 	}
 	_, err = h.writer.Write(line)
