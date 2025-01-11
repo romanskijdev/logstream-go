@@ -3,7 +3,9 @@ package logstream
 import (
 	"github.com/gorilla/websocket"
 	"github.com/sirupsen/logrus"
+	"io"
 	"net/http"
+	"os"
 )
 
 // Upgrader для веб-сокетов
@@ -22,7 +24,11 @@ var broadcast = make(chan string)
 // Инициализация логирования
 func InitLogger() {
 	logrus.SetFormatter(&logrus.JSONFormatter{})
-	logrus.SetOutput(httpResponseWriter{w: broadcast})
+
+	// Создаем многозадачный Writer для перенаправления логов в WebSocket и консоль
+	multiWriter := io.MultiWriter(os.Stdout, httpResponseWriter{w: broadcast})
+	logrus.SetOutput(multiWriter)
+
 	go handleLogMessages()
 }
 
