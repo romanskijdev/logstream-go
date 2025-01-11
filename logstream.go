@@ -24,8 +24,9 @@ var broadcast = make(chan string)
 
 // Инициализация логирования
 func InitLogger() {
-	// Создаем стандартный форматтер для вывода в консоль
-	logrus.SetFormatter(&logrus.TextFormatter{})
+	// Устанавливаем TextFormatter для вывода в консоль
+	consoleFormatter := &logrus.TextFormatter{}
+	logrus.SetFormatter(consoleFormatter)
 
 	// Создаем многозадачный Writer для вывода в консоль и кастомный Writer для WebSocket
 	multiWriter := io.MultiWriter(os.Stdout, newWebSocketWriter())
@@ -42,6 +43,7 @@ func newWebSocketWriter() *webSocketWriter {
 }
 
 func (w *webSocketWriter) Write(p []byte) (int, error) {
+	// Парсинг сообщения в формат JSON для отправки через WebSocket
 	var logEntry map[string]interface{}
 	err := json.Unmarshal(p, &logEntry)
 	if err != nil {
@@ -52,6 +54,8 @@ func (w *webSocketWriter) Write(p []byte) (int, error) {
 		return 0, err
 	}
 	broadcast <- string(jsonLog)
+
+	// Возвращаем оригинальное сообщение для консоли
 	return len(p), nil
 }
 
