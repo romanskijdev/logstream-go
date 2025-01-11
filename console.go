@@ -16,6 +16,7 @@ func newConsoleHook(writer io.Writer) *consoleHook {
 
 func (h *consoleHook) Fire(entry *logrus.Entry) error {
 	formatter := &logrus.TextFormatter{} // Используем TextFormatter
+
 	line, err := formatter.Format(entry)
 	if err != nil {
 		logrus.WithError(err).Error("Failed to format log entry to Console")
