@@ -1,4 +1,4 @@
-module github.com/romanskijdev/logstream-go
+module github.com/romanskijdev/logstream-go/v1
 
 go 1.23.1
 
