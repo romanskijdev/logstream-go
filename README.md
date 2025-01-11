@@ -22,7 +22,7 @@ Add this import line to the file you're working in:
 import "github.com/romanskijdev/logstream-go"
 ```
 
-## Init logstream client
+## Example
 
 ```Go
 package main
@@ -43,5 +43,33 @@ func main() {
 	
 	mux := http.NewServeMux()
 	mux.HandleFunc("/ws", client.HandleConnections)
+
+	logrus.Error("This is a ERR log message")
+	logrus.Warning("This is a Warning log message")
+	logrus.Info("This is a Info log message")
+	logrus.Debug("This is a Debug log message")
 }
 ```
+
+This example will generate the following output:
+
+```
+Console: 
+ERRO[2025-01-11 23:28:10] This is a ERR log message                    
+WARN[2025-01-11 23:28:10] This is a Warning log message                
+INFO[2025-01-11 23:28:10] This is a Info log message
+DEBUG[2025-01-11 23:28:10] This is a Debug log message
+
+WebSockets body example:
+{
+    "level": "info",
+    "msg": "This is a Info log message",
+    "time": "2025-01-11T23:18:17+03:00"
+}
+
+logs.json:
+{"2025-01-11":[
+    {"level":"info","msg":"Starting server on :8080","time":"2025-01-11T23:18:31+03:00"},
+    {"level":"error","msg":"This is a ERR log message","time":"2025-01-11T23:18:32+03:00"}
+  ]
+}
