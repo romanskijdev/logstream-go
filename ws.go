@@ -1,6 +1,9 @@
 package logstream
 
-import "github.com/sirupsen/logrus"
+import (
+	"fmt"
+	"github.com/sirupsen/logrus"
+)
 
 // Хук для отправки в WebSocket
 type webSocketHook struct {
@@ -15,7 +18,7 @@ func (h *webSocketHook) Fire(entry *logrus.Entry) error {
 	formatter := &logrus.JSONFormatter{}
 	line, err := formatter.Format(entry)
 	if err != nil {
-		logrus.WithError(err).Error("Failed to format log entry to JSON")
+		fmt.Println("Failed to format log entry to JSON")
 
 		return err // Возвращаем ошибку, если форматирование не удалось
 	}

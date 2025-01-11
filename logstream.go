@@ -23,6 +23,7 @@ var broadcast = make(chan string)
 // Инициализация логирования
 func InitLogger() {
 	logrus.SetReportCaller(false)
+	logrus.StandardLogger().ReplaceHooks(make(logrus.LevelHooks))
 
 	// Создаем хуки для разных форматов
 	consoleHook := newConsoleHook(os.Stdout)
