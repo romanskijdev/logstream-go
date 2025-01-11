@@ -1,9 +1,9 @@
 package main
 
 import (
+	"github.com/romanskijdev/logstream-go/logstream"
 	"github.com/sirupsen/logrus"
 	"log"
-	"logstream/logstream"
 	"net/http"
 )
 
