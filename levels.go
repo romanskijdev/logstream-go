@@ -6,6 +6,6 @@ func (h *webSocketHook) Levels() []logrus.Level {
 	return logrus.AllLevels
 }
 
-func (h *consoleHook) Levels() []logrus.Level {
+func (h *fileHook) Levels() []logrus.Level {
 	return logrus.AllLevels
 }

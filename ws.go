@@ -1,28 +1,29 @@
 package logstream
 
 import (
-	"fmt"
+	"encoding/json"
 	"github.com/sirupsen/logrus"
 )
 
-// Хук для отправки в WebSocket
-type webSocketHook struct {
-	broadcast chan<- string
+// WebSocketWriter for sending messages to web sockets
+type webSocketWriter struct {
+	broadcast chan<- map[string]interface{}
 }
 
-func newWebSocketHook(broadcast chan<- string) *webSocketHook {
-	return &webSocketHook{broadcast: broadcast}
+func newWebSocketWriter(broadcast chan<- map[string]interface{}) *webSocketWriter {
+	return &webSocketWriter{broadcast: broadcast}
+}
+
+func (w *webSocketWriter) Write(p []byte) (int, error) {
+	var logEntry map[string]interface{}
+	if err := json.Unmarshal(p, &logEntry); err != nil {
+		return 0, err
+	}
+	w.broadcast <- logEntry
+	return len(p), nil
 }
 
 func (h *webSocketHook) Fire(entry *logrus.Entry) error {
-	formatter := &logrus.JSONFormatter{}
-	line, err := formatter.Format(entry)
-	if err != nil {
-		fmt.Println("Failed to format log entry to JSON")
-
-		return err // Возвращаем ошибку, если форматирование не удалось
-	}
-
-	h.broadcast <- string(line)
-	return nil // Возвращаем nil только если все прошло успешно
+	h.logger.WithFields(entry.Data).Log(entry.Level, entry.Message)
+	return nil
 }
