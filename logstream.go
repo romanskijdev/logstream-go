@@ -1,10 +1,8 @@
 package logstream
 
 import (
-	"encoding/json"
 	"github.com/gorilla/websocket"
 	"github.com/sirupsen/logrus"
-	"io"
 	"net/http"
 	"os"
 )
@@ -24,39 +22,13 @@ var broadcast = make(chan string)
 
 // Инициализация логирования
 func InitLogger() {
-	// Устанавливаем TextFormatter для вывода в консоль
-	consoleFormatter := &logrus.TextFormatter{}
-	logrus.SetFormatter(consoleFormatter)
+	// Создаем хуки для разных форматов
+	consoleHook := newConsoleHook(os.Stdout)
+	webSocketHook := newWebSocketHook(broadcast)
 
-	// Создаем многозадачный Writer для вывода в консоль и кастомный Writer для WebSocket
-	multiWriter := io.MultiWriter(os.Stdout, newWebSocketWriter())
-	logrus.SetOutput(multiWriter)
-
-	go handleLogMessages()
-}
-
-// Кастомный Writer для WebSocket, который форматирует логи в JSON
-type webSocketWriter struct{}
-
-func newWebSocketWriter() *webSocketWriter {
-	return &webSocketWriter{}
-}
-
-func (w *webSocketWriter) Write(p []byte) (int, error) {
-	// Парсинг сообщения в формат JSON для отправки через WebSocket
-	var logEntry map[string]interface{}
-	err := json.Unmarshal(p, &logEntry)
-	if err != nil {
-		return 0, err
-	}
-	jsonLog, err := json.Marshal(logEntry)
-	if err != nil {
-		return 0, err
-	}
-	broadcast <- string(jsonLog)
-
-	// Возвращаем оригинальное сообщение для консоли
-	return len(p), nil
+	// Добавляем хуки к логгеру
+	logrus.AddHook(consoleHook)
+	logrus.AddHook(webSocketHook)
 }
 
 // Обработчик соединений
