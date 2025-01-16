@@ -7,6 +7,7 @@ import (
 	"github.com/sirupsen/logrus"
 	"net/http"
 	"os"
+	"path/filepath"
 	"runtime"
 )
 
@@ -61,6 +62,12 @@ func (config *LoggerConfig) InitLogger() error {
 	logrus.AddHook(&webSocketHook{logger: webSocketLogger})
 
 	if config.FilePath != nil {
+		// ensure directory exists
+		err := os.MkdirAll(filepath.Dir(*config.FilePath), 0755)
+		if err != nil {
+			return errors.New(fmt.Sprintf("failed to create log directory: %v", err))
+		}
+
 		// creating logs file (if not exist)
 		fileLogger := logrus.New()
 		fileLogger.SetFormatter(&logrus.JSONFormatter{})
